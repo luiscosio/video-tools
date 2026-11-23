@@ -1,6 +1,8 @@
 """Browser interactions and optional recording diagnostics."""
+
 from __future__ import annotations
 
+import contextlib
 import os
 from datetime import UTC, datetime
 from pathlib import Path
@@ -23,6 +25,7 @@ CURSOR_JS = """
   window.__recCursor = c;
 })();
 """
+
 
 class PageActions:
     def pause(self, seconds: float = 1.0) -> None:
@@ -57,7 +60,13 @@ class PageActions:
         # Date and time inputs take keystrokes per segment in the browser's locale,
         # so typing "2027-01-31" into one goes nowhere: fill them even when recording.
         kind = (loc.get_attribute("type") or "").lower()
-        if self.recording and kind not in ("date", "time", "datetime-local", "month", "week"):
+        if self.recording and kind not in (
+            "date",
+            "time",
+            "datetime-local",
+            "month",
+            "week",
+        ):
             self.click(loc, settle=0.1)
             loc.fill("")
             loc.press_sequentially(text, delay=70)
@@ -77,7 +86,10 @@ class PageActions:
             # The page may be navigating on its own (a redirect after a sale) at the
             # same moment; Playwright then aborts our goto. Let it land and retry once.
             msg = str(err)
-            if "interrupted by another navigation" not in msg and "ERR_ABORTED" not in msg:
+            if (
+                "interrupted by another navigation" not in msg
+                and "ERR_ABORTED" not in msg
+            ):
                 raise
             self.page.wait_for_load_state("load")
             self.page.goto(url)
@@ -110,7 +122,14 @@ def _now() -> str:
     return datetime.now(UTC).isoformat(timespec="milliseconds")
 
 
-TIMING = ("startTime", "connectStart", "connectEnd", "requestStart", "responseStart", "responseEnd")
+TIMING = (
+    "startTime",
+    "connectStart",
+    "connectEnd",
+    "requestStart",
+    "responseStart",
+    "responseEnd",
+)
 
 
 def _network_log(page: Page) -> list[str] | None:
@@ -126,7 +145,10 @@ def _network_log(page: Page) -> list[str] | None:
     def done(req) -> None:
         note("done", req, " ".join(f"{k}={req.timing.get(k, -1):.0f}" for k in TIMING))
 
-    page.on("request", lambda r: note("request", r, "nav" if r.is_navigation_request() else ""))
+    page.on(
+        "request",
+        lambda r: note("request", r, "nav" if r.is_navigation_request() else ""),
+    )
     page.on("requestfinished", done)
     page.on("requestfailed", lambda r: note("failed", r, str(r.failure)))
     page.on("load", lambda _: lines.append(f"{_now()} load     {page.url[:160]}"))
@@ -139,7 +161,9 @@ def _failure_network_log(lines: list[str] | None, scenario: str) -> None:
         return
     with contextlib.suppress(Exception):
         Path(out).mkdir(parents=True, exist_ok=True)
-        with (Path(out) / f"{scenario}.network.log").open("a") as f:  # a flow run twice keeps both
+        with (Path(out) / f"{scenario}.network.log").open(
+            "a"
+        ) as f:  # a flow run twice keeps both
             f.write("\n".join(lines) + "\n\n")
 
 
@@ -150,4 +174,6 @@ def _failure_screenshot(page: Page, scenario: str) -> None:
         return
     with contextlib.suppress(Exception):
         Path(out).mkdir(parents=True, exist_ok=True)
-        page.screenshot(path=str(Path(out) / f"{scenario}.png"), full_page=True, timeout=10_000)
+        page.screenshot(
+            path=str(Path(out) / f"{scenario}.png"), full_page=True, timeout=10_000
+        )

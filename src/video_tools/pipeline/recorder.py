@@ -32,16 +32,14 @@ class Rec(PageActions):
     page: Page
     urls: DemoUrls
     recording: bool
-    log: list[str] | None = None  # CI network log (_network_log), kept when a flow fails
+    log: list[str] | None = (
+        None  # CI network log (_network_log), kept when a flow fails
+    )
 
 
-
-
-
-
-
-
-def run(scenario: str, *, params: dict | None = None, video_to: Path | None = None) -> Path | None:
+def run(
+    scenario: str, *, params: dict | None = None, video_to: Path | None = None
+) -> Path | None:
     """Run scenarios/<scenario>.py. With video_to, record and return the mp4-ready webm."""
     module = importlib.import_module(f"scenarios.{scenario}")
     recording = video_to is not None
@@ -66,7 +64,10 @@ def run(scenario: str, *, params: dict | None = None, video_to: Path | None = No
         page.set_default_timeout(20_000)
         net = _network_log(page)
         try:
-            module.run(Rec(page=page, urls=urls, recording=recording, log=net), **(params or {}))
+            module.run(
+                Rec(page=page, urls=urls, recording=recording, log=net),
+                **(params or {}),
+            )
             if recording:
                 page.wait_for_timeout(600)
         except Exception:
@@ -83,13 +84,3 @@ def run(scenario: str, *, params: dict | None = None, video_to: Path | None = No
             shutil.rmtree(tmp, ignore_errors=True)
             return video_to
     return None
-
-
-
-
-
-
-
-
-
-
