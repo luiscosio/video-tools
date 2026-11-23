@@ -60,7 +60,7 @@ def load(slug_or_path: str) -> Episode:
         path = EPISODES_DIR / slug_or_path / "episode.yaml"
     raw = yaml.safe_load(path.read_text(encoding="utf-8"))
     if not isinstance(raw, dict) or not re.fullmatch(
-        r"[a-zA-Z0-9][a-zA-Z0-9_-]*", str(raw.get("slug", ""))
+        r"[a-zA-Z0-9_][a-zA-Z0-9_-]*", str(raw.get("slug", ""))
     ):
         raise ValueError("Episode slug must be a simple filename")
     if raw.get("dataset") and not getattr(config, "ALLOW_DATASET", False):
@@ -78,7 +78,7 @@ def load(slug_or_path: str) -> Episode:
             raise SystemExit(
                 f"Scene {scene.id}: unknown kind {scene.kind!r}. The kind must be enabled for this project"
             )
-        if scene.kind == "image" and (
+        if (scene.kind == "image" or scene.image) and (
             not scene.image or not (path.parent / scene.image).is_file()
         ):
             raise SystemExit(

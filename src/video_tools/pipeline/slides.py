@@ -33,6 +33,8 @@ def html(episode: Episode, scene: Scene, env: Environment | None = None) -> str:
         return env.get_template("image.html.j2").render(
             **common, **scene.data, src=src, caption=scene.caption
         )
+    if scene.image:
+        common["src"] = episode.image_path(scene).as_uri()
     return env.get_template(f"{scene.slide}.html.j2").render(**common, **scene.data)
 
 
