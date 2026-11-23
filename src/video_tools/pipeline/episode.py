@@ -13,6 +13,8 @@ import yaml
 from . import config
 from .config import EPISODES_DIR, OUTPUT_DIR
 
+KINDS = getattr(config, "SCENE_KINDS", ("slide", "screen"))
+
 
 @dataclass
 class Scene:
@@ -74,7 +76,7 @@ def load(slug_or_path: str) -> Episode:
     for scene in scenes:
         if not re.fullmatch(r"[a-zA-Z0-9][a-zA-Z0-9_-]*", scene.id):
             raise ValueError("Scene ID must be a simple filename")
-        if scene.kind not in getattr(config, "SCENE_KINDS", ("slide", "screen")):
+        if scene.kind not in KINDS:
             raise SystemExit(
                 f"Scene {scene.id}: unknown kind {scene.kind!r}. The kind must be enabled for this project"
             )
