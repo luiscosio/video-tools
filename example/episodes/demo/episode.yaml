@@ -1,0 +1,9 @@
+slug: demo
+title: First recording
+scenes:
+  - id: intro
+    kind: slide
+    slide: title
+    narration: This is a sample project.
+    data:
+      heading: First recording
