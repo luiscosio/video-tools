@@ -4,18 +4,28 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from jinja2 import Environment, FileSystemLoader, StrictUndefined
+from jinja2 import (
+    ChoiceLoader,
+    Environment,
+    FileSystemLoader,
+    PackageLoader,
+    StrictUndefined,
+)
 
 from . import config
 from .config import HEIGHT, SLIDES_DIR, WIDTH
+from .episode import Episode, Scene
 
 BRAND_DIR = getattr(config, "BRAND_DIR", SLIDES_DIR / "assets")
-from .episode import Episode, Scene
 
 
 def _env() -> Environment:
     return Environment(
-        loader=FileSystemLoader(SLIDES_DIR), undefined=StrictUndefined, autoescape=True
+        loader=ChoiceLoader(
+            [FileSystemLoader(SLIDES_DIR), PackageLoader("video_tools", "templates")]
+        ),
+        undefined=StrictUndefined,
+        autoescape=True,
     )
 
 
@@ -64,7 +74,9 @@ def render(
         if not scene.is_still or (only and scene.id not in only):
             continue
         # Written next to the templates, then deleted once captured.
-        page_path = SLIDES_DIR / f".render-{scene.id}.html"
+        page_path = (
+            SLIDES_DIR if SLIDES_DIR.is_dir() else out_dir
+        ) / f".render-{scene.id}.html"
         page_path.write_text(html(episode, scene, env), encoding="utf-8")
         jobs.append((scene.id, page_path))
 

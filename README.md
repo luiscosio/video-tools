@@ -4,7 +4,7 @@ Build a narrated MP4 from an episode written in YAML. Each scene can render a sl
 
 ## Try the sample
 
-Install Python 3.11 or later, uv, FFmpeg with the subtitles filter, and ffprobe. From a checkout of this repository, run the following commands.
+Install Python 3.11 or later, uv, FFmpeg with the subtitles filter, and ffprobe. Clone the repository and run the sample.
 
 ```sh
 git clone --branch main https://github.com/luiscosio/video-tools.git
@@ -14,7 +14,7 @@ uv run --project .. playwright install chromium
 uv run --project .. video-tools slides demo
 ```
 
-The sample slide renders locally. For narration, set `ELEVENLABS_API_KEY` and `ELEVENLABS_VOICE_ID` in your environment for a voice you have permission to use. Set `ELEVENLABS_MODEL_ID` to override the model. The voice command contacts ElevenLabs and may incur charges. Repeated builds reuse cached narration when the text, model and voice match.
+The sample contains only an episode YAML. The shared title and image templates render locally. A project can override them in its own `slides/` directory. For narration, set `ELEVENLABS_API_KEY` and `ELEVENLABS_VOICE_ID` in your environment for a voice you have permission to use. Set `ELEVENLABS_MODEL_ID` to override the model. The voice command contacts ElevenLabs and may incur charges. Repeated builds reuse cached narration when the text, model and voice match.
 
 ```sh
 uv run --project .. video-tools voice demo

@@ -42,3 +42,19 @@ def test_cached_scene_avoids_http(monkeypatch, tmp_path):
     for _ in range(2):
         assert voice.synthesize_scene(scene, "en", tmp_path).read_bytes() == b"audio"
     assert len(calls) == 1
+
+
+def test_picture_on_a_custom_slide(tmp_path, monkeypatch):
+    monkeypatch.setattr(slides, "SLIDES_DIR", tmp_path)
+    (tmp_path / "shot.html.j2").write_text('<img src="{{ src }}">')
+    picture = tmp_path / "sample.png"
+    picture.touch()
+    src = tmp_path / "episode.yaml"
+    src.write_text(
+        "slug: _smoke\ntitle: Sample\nscenes:\n  - {id: first, kind: slide, slide: shot, image: sample.png, narration: Example}\n"
+    )
+    demo = episode.load(str(src))
+    assert picture.as_uri() in slides.html(demo, demo.scenes[0])
+    picture.unlink()
+    with pytest.raises(SystemExit, match="needs 'image'"):
+        episode.load(str(src))
